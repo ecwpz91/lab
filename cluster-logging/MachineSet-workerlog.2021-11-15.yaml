@@ -1,0 +1,70 @@
+---
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  labels:
+    machine.openshift.io/cluster-api-cluster: CLUSTERID
+    machine.openshift.io/cluster-api-machine-role: infra
+    machine.openshift.io/cluster-api-machine-type: worker
+  name: CLUSTERID-workerlog-ZONE
+  namespace: openshift-machine-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: CLUSTERID
+      machine.openshift.io/cluster-api-machineset: CLUSTERID-workerlog-ZONE
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        machine.openshift.io/cluster-api-cluster: CLUSTERID
+        machine.openshift.io/cluster-api-machine-role: infra
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: CLUSTERID-workerlog-ZONE
+    spec:
+      metadata:
+        creationTimestamp: null
+        labels:
+          role: logging-node
+          node-role.kubernetes.io/infra: ""
+      providerSpec:
+        value:
+          ami:
+            id: ami-0f0650094e7a74b2b
+          apiVersion: awsproviderconfig.openshift.io/v1beta1
+          blockDevices:
+          - ebs:
+              iops: 0
+              volumeSize: 120
+              volumeType: gp2
+          credentialsSecret:
+            name: aws-cloud-credentials
+          deviceIndex: 0
+          iamInstanceProfile:
+            id: CLUSTERID-worker-profile
+          instanceType: m5.4xlarge
+          kind: AWSMachineProviderConfig
+          metadata:
+            creationTimestamp: null
+          placement:
+            availabilityZone: ZONE
+            region: REGION
+          publicIp: null
+          securityGroups:
+          - filters:
+            - name: tag:Name
+              values:
+              - CLUSTERID-worker-sg
+          subnet:
+            filters:
+            - name: tag:Name
+              values:
+              - CLUSTERID-private-ZONE
+          tags:
+          - name: kubernetes.io/cluster/CLUSTERID
+            value: owned
+          userDataSecret:
+            name: worker-user-data
+      versions:
+        kubelet: ""
